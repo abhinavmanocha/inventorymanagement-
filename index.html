@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management Tool</title>
+    <style>
+        .inventory-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .item-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            width: 300px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .item-card .flagged {
+            color: red;
+            font-weight: bold;
+        }
+        .item-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .item-card button {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .item-card input {
+            width: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Inventory Management</h1>
+    <div id="inventory-list" class="inventory-list"></div>
+    <button onclick="exportFlaggedItems()">Export Flagged Items</button>
+    <button onclick="saveInventoryState()">Save Inventory State</button>
+    <input type="file" id="upload" onchange="uploadInventoryState()" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadInventoryState();
+            renderInventory();
+        });
+
+        const inventory = [
+            { name: 'Pollock Taco Cut Breaded', threshold: 10, stock: 0 },
+            { name: 'Shrimp White Breaded Popcorn', threshold: 5, stock: 0 },
+            { name: 'Ground Beef Lean Halal', threshold: 8, stock: 0 },
+            { name: 'Ground Round Veggie', threshold: 6, stock: 0 },
+            { name: 'BarBurrito Chicken Bite Halal', threshold: 10, stock: 0 },
+            { name: 'Unmarinated Chicken Halal', threshold: 6, stock: 0 },
+            { name: 'Pork Carnita Shred Pulled', threshold: 7, stock: 0 },
+            { name: 'Ground Beef Lean Fresh', threshold: 8, stock: 0 },
+            { name: 'Steak Beef Strips Stir Fry', threshold: 4, stock: 0 },
+            { name: 'Churros with Oreo Crumb', threshold: 10, stock: 0 },
+            { name: 'Churro Tio Pepes 10"', threshold: 12, stock: 0 },
+            { name: 'Falafel Fritter Uncooked', threshold: 5, stock: 0 },
+            { name: 'Wrap Plain 12" Gluten Free', threshold: 6, stock: 0 },
+            { name: 'Fries S/C Pub Extra Crunch', threshold: 15, stock: 0 },
+            { name: 'Empanada Apple Pie', threshold: 6, stock: 0 },
+            { name: 'Tortilla Flour 5"', threshold: 20, stock: 0 },
+            { name: 'Tortilla Corn Yellow Pre Cut', threshold: 12, stock: 0 },
+            { name: 'Tortilla Flour 13.5"', threshold: 10, stock: 0 },
+            { name: 'Tortilla Whole Wheat 13.5"', threshold: 12, stock: 0 },
+            { name: 'Tortilla Flour 8"', threshold: 20, stock: 0 },
+            { name: 'Tortilla Whole Wheat 10"', threshold: 12, stock: 0 },
+            { name: 'Tortilla Flour 12"', threshold: 12, stock: 0 },
+            { name: 'Tortilla SunDried Tomato 12"', threshold: 8, stock: 0 },
+            { name: 'Tortilla Flour 10"', threshold: 12, stock: 0 },
+            { name: 'Tortilla Whole Wheat 12"', threshold: 12, stock: 0 },
+            { name: 'Bar Burrito PL Guacamole', threshold: 12, stock: 0 },
+            { name: 'Cheese Cheddar & Mozzarella Shredded', threshold: 5, stock: 0 },
+            { name: 'Sour Cream 14%', threshold: 8, stock: 0 },
+            { name: 'Milk 2% 237ml', threshold: 10, stock: 0 },
+            { name: 'Milk 2% Corrugated 473ml', threshold: 10, stock: 0 },
+            { name: 'Milk Chocolate Corrugated', threshold: 12, stock: 0 },
+            { name: 'Cream 10% Corrugated', threshold: 6, stock: 0 },
+            { name: 'Pepper Jalapeno Sliced', threshold: 3, stock: 0 },
+            { name: 'Avocado', threshold: 10, stock: 0 },
+            { name: 'Herb Cilantro', threshold: 4, stock: 0 },
+            { name: 'Lettuce Iceberg', threshold: 6, stock: 0 },
+            { name: 'Onions Green', threshold: 8, stock: 0 },
+            { name: 'Onions Red Jumbo', threshold: 5, stock: 0 },
+            { name: 'Onions Spanish Jumbo', threshold: 5, stock: 0 },
+            { name: 'Onions Spanish Colossal', threshold: 6, stock: 0 },
+            { name: 'Peppers Green Large', threshold: 5, stock: 0 },
+            { name: 'Peppers Green', threshold: 5, stock: 0 },
+            { name: 'Peppers Red', threshold: 5, stock: 0 },
+            { name: 'Peppers Scotch Bonnet', threshold: 8, stock: 0 },
+            { name: 'Tomato Medium 6x7', threshold: 10, stock: 0 },
+            { name: 'Garlic Puree', threshold: 6, stock: 0 },
+            { name: 'Vegetarian Bean Spice Mix', threshold: 4, stock: 0 },
+            { name: 'Black Pepper Ground Filler Pouch', threshold: 6, stock: 0 },
+            { name: 'Powder Mexican Chili', threshold: 5, stock: 0 },
+            { name: 'New and Improved Ground Beef', threshold: 7, stock: 0 },
+            { name: 'Cinnamon Sugar Shaker', threshold: 8, stock: 0 },
+            { name: 'Seasoning Mexican Steak Halal', threshold: 5, stock: 0 },
+            { name: 'Seasoning Chicken Rub', threshold: 5, stock: 0 },
+            { name: 'Paddle Wood 36"', threshold: 4, stock: 0 },
+            { name: 'Perf Portion Spoon 1 Oz', threshold: 3, stock: 0 },
+            { name: 'Sugar White Fine', threshold: 10, stock: 0 },
+            { name: 'Topping Chocolate Choc O Rich', threshold: 8, stock: 0 },
+            { name: 'Corn Whole Kernel', threshold: 5, stock: 0 },
+            { name: 'Tomato Diced No Salt Added', threshold: 6, stock: 0 },
+            { name: 'Bean Black Turtle', threshold: 6, stock: 0 },
+            { name: 'Bean Pinto', threshold: 7, stock: 0 },
+            { name: 'Garbage Bag Black Strong 35x50', threshold: 10, stock: 0 },
+            { name: 'Garbage Bag Black Strong 30x38', threshold: 8, stock: 0 },
+            { name: 'Garbage Bag Clear Enhance 35x50', threshold: 5, stock: 0 },
+            { name: 'Bag Poly 2lb 4x2x10', threshold: 12, stock: 0 },
+            { name: 'Bag Poly 3lb 5x2x11.5', threshold: 12, stock: 0 },
+            { name: 'Bag Apple Pie', threshold: 6, stock: 0 },
+            { name: 'Bag Paper Twist Handle', threshold: 15, stock: 0 },
+            { name: 'Bag Printed Small 4x2x8', threshold: 10, stock: 0 },
+            { name: 'Cleaner Detergent Pot and Pan', threshold: 5, stock: 0 },
+            { name: 'Pad Scour Green H-97 6x9', threshold: 4, stock: 0 },
+            { name: 'Grill Brick Acr', threshold: 3, stock: 0 },
+            { name: 'Delimer Cleaner Tablets', threshold: 6, stock: 0 },
+            { name: 'Sanitizer Quat II Liquid', threshold: 8, stock: 0 },
+            { name: 'Cleaner Restroom Kay QSR', threshold: 6, stock: 0 },
+            { name: 'Cleaner Grill Heat Activated', threshold: 5, stock: 0 },
+            { name: 'Detergent Sink Multi Purpose', threshold: 7, stock: 0 },
+            { name: 'CL HDD Degreaser Bag', threshold: 4, stock: 0 },
+            { name: 'Cleaner & Polish Stainless', threshold: 5, stock: 0 },
+            { name: 'Degreaser QSR Heavy Duty', threshold: 8, stock: 0 },
+            { name: 'IA Hand Foam Antibac Soap', threshold: 10, stock: 0 },
+            { name: '2 in 1 Conc Floor Cleaner', threshold: 5, stock: 0 },
+            { name: 'Kay QSR Tile Floor Cleaner', threshold: 6, stock: 0 },
+            { name: 'Portion Cup PS Translucent 2oz', threshold: 8, stock: 0 },
+            { name: 'Portion Cup Plastic Clear 3.25oz', threshold: 6, stock: 0 },
+            { name: 'Lid for 3.25-5.5oz Portion Cup', threshold: 10, stock: 0 },
+            { name: 'Container Bagasse 9x6', threshold: 12, stock: 0 },
+            { name: 'Wooden Spoon Bar Burrito', threshold: 8, stock: 0 },
+            { name: 'Wooden Knife Bar Burrito', threshold: 8, stock: 0 },
+            { name: 'Wooden Fork Bar Burrito', threshold: 8, stock: 0 },
+            { name: 'Spring Water Pure Life Pet', threshold: 15, stock: 0 },
+            { name: 'Water Purified', threshold: 10, stock: 0 },
+            { name: 'Cola Coke Pet 500ml', threshold: 12, stock: 0 },
+            { name: 'Cola Coke Zero 500ml', threshold: 10, stock: 0 },
+            { name: 'Cola Coke Diet Pet 500ml', threshold: 10, stock: 0 },
+            { name: 'Soda Sprite Pet 500ml', threshold: 10, stock: 0 },
+            { name: 'Ginger Ale Canada Dry Pet 500ml', threshold: 10, stock: 0 },
+            { name: 'Root Beer Barqs 500ml', threshold: 8, stock: 0 },
+            { name: 'Soda Fresca Pet 500ml', threshold: 12, stock: 0 },
+            { name: 'Energy Drink Monster Can', threshold: 5, stock: 0 },
+            { name: 'Energy Drink Monster Ultra', threshold: 6, stock: 0 },
+            { name: 'Drink BodyArmor Fruit Punch', threshold: 7, stock: 0 },
+            { name: 'Drink BodyArmor Strawberry Banana', threshold: 7, stock: 0 }
+        ];
+
+        function renderInventory() {
+            const inventoryList = document.getElementById('inventory-list');
+            inventoryList.innerHTML = '';
+            inventory.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('item-card');
+                itemDiv.classList.toggle('flagged', item.stock < item.threshold);
+                
+                itemDiv.innerHTML = `
+                    <h3>${item.name}</h3>
+                    <p>Threshold: ${item.threshold}</p>
+                    <p>Current Stock: <span id="stock-${index}">${item.stock}</span></p>
+                    <button onclick="updateStock(${index}, 1)">+</button>
+                    <button onclick="updateStock(${index}, -1)">-</button>
+                    <input type="number" value="${item.stock}" step="0.1" onchange="setStock(${index}, this.value)">
+                `;
+
+                inventoryList.appendChild(itemDiv);
+            });
+        }
+
+        function updateStock(index, change) {
+            inventory[index].stock = Math.max(0, inventory[index].stock + change);
+            renderInventory();
+        }
+
+        function setStock(index, value) {
+            inventory[index].stock = Math.max(0, parseFloat(value));
+            renderInventory();
+        }
+
+        function exportFlaggedItems() {
+            const flaggedItems = inventory.filter(item => item.stock < item.threshold);
+            let content = 'Flagged Items:\n\n';
+            flaggedItems.forEach(item => {
+                content += `${item.name}: Current Stock: ${item.stock}, Threshold: ${item.threshold}\n`;
+            });
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'flagged_inventory.txt';
+            link.click();
+        }
+
+        function saveInventoryState() {
+            localStorage.setItem('inventoryState', JSON.stringify(inventory));
+        }
+
+        function loadInventoryState() {
+            const savedState = localStorage.getItem('inventoryState');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                parsedState.forEach((item, index) => {
+                    if (inventory[index]) {
+                        inventory[index].stock = item.stock;
+                    }
+                });
+            }
+        }
+
+        function uploadInventoryState() {
+            const file = document.getElementById('upload').files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const uploadedState = JSON.parse(e.target.result);
+                uploadedState.forEach((item, index) => {
+                    if (inventory[index]) {
+                        inventory[index].stock = item.stock;
+                    }
+                });
+                renderInventory();
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
