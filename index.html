@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management Tool</title>
     <style>
+        /* Your existing styles */
+        .inventory-section {
+            margin-bottom: 40px;
+        }
+        .inventory-section h2 {
+            margin-bottom: 20px;
+        }
         .inventory-list {
             display: flex;
             flex-wrap: wrap;
@@ -18,9 +24,8 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             position: relative;
         }
-        .item-card .flagged {
-            color: red;
-            font-weight: bold;
+        .item-card.flagged {
+            border-color: red;
         }
         .item-card h3 {
             margin-top: 0;
@@ -38,7 +43,7 @@
 </head>
 <body>
     <h1>Inventory Management</h1>
-    <div id="inventory-list" class="inventory-list"></div>
+    <div id="inventory-container"></div>
     <button onclick="exportFlaggedItems()">Export Flagged Items</button>
     <button onclick="saveInventoryState()">Save Inventory State</button>
     <input type="file" id="upload" onchange="uploadInventoryState()" />
@@ -49,149 +54,187 @@
             renderInventory();
         });
 
-        const inventory = [
-            { name: 'Pollock Taco Cut Breaded', threshold: 10, stock: 0 },
-            { name: 'Shrimp White Breaded Popcorn', threshold: 5, stock: 0 },
-            { name: 'Ground Beef Lean Halal', threshold: 8, stock: 0 },
-            { name: 'Ground Round Veggie', threshold: 6, stock: 0 },
-            { name: 'BarBurrito Chicken Bite Halal', threshold: 10, stock: 0 },
-            { name: 'Unmarinated Chicken Halal', threshold: 6, stock: 0 },
-            { name: 'Pork Carnita Shred Pulled', threshold: 7, stock: 0 },
-            { name: 'Ground Beef Lean Fresh', threshold: 8, stock: 0 },
-            { name: 'Steak Beef Strips Stir Fry', threshold: 4, stock: 0 },
-            { name: 'Churros with Oreo Crumb', threshold: 10, stock: 0 },
-            { name: 'Churro Tio Pepes 10"', threshold: 12, stock: 0 },
-            { name: 'Falafel Fritter Uncooked', threshold: 5, stock: 0 },
-            { name: 'Wrap Plain 12" Gluten Free', threshold: 6, stock: 0 },
-            { name: 'Fries S/C Pub Extra Crunch', threshold: 15, stock: 0 },
-            { name: 'Empanada Apple Pie', threshold: 6, stock: 0 },
-            { name: 'Tortilla Flour 5"', threshold: 20, stock: 0 },
-            { name: 'Tortilla Corn Yellow Pre Cut', threshold: 12, stock: 0 },
-            { name: 'Tortilla Flour 13.5"', threshold: 10, stock: 0 },
-            { name: 'Tortilla Whole Wheat 13.5"', threshold: 12, stock: 0 },
-            { name: 'Tortilla Flour 8"', threshold: 20, stock: 0 },
-            { name: 'Tortilla Whole Wheat 10"', threshold: 12, stock: 0 },
-            { name: 'Tortilla Flour 12"', threshold: 12, stock: 0 },
-            { name: 'Tortilla SunDried Tomato 12"', threshold: 8, stock: 0 },
-            { name: 'Tortilla Flour 10"', threshold: 12, stock: 0 },
-            { name: 'Tortilla Whole Wheat 12"', threshold: 12, stock: 0 },
-            { name: 'Bar Burrito PL Guacamole', threshold: 12, stock: 0 },
-            { name: 'Cheese Cheddar & Mozzarella Shredded', threshold: 5, stock: 0 },
-            { name: 'Sour Cream 14%', threshold: 8, stock: 0 },
-            { name: 'Milk 2% 237ml', threshold: 10, stock: 0 },
-            { name: 'Milk 2% Corrugated 473ml', threshold: 10, stock: 0 },
-            { name: 'Milk Chocolate Corrugated', threshold: 12, stock: 0 },
-            { name: 'Cream 10% Corrugated', threshold: 6, stock: 0 },
-            { name: 'Pepper Jalapeno Sliced', threshold: 3, stock: 0 },
-            { name: 'Avocado', threshold: 10, stock: 0 },
-            { name: 'Herb Cilantro', threshold: 4, stock: 0 },
-            { name: 'Lettuce Iceberg', threshold: 6, stock: 0 },
-            { name: 'Onions Green', threshold: 8, stock: 0 },
-            { name: 'Onions Red Jumbo', threshold: 5, stock: 0 },
-            { name: 'Onions Spanish Jumbo', threshold: 5, stock: 0 },
-            { name: 'Onions Spanish Colossal', threshold: 6, stock: 0 },
-            { name: 'Peppers Green Large', threshold: 5, stock: 0 },
-            { name: 'Peppers Green', threshold: 5, stock: 0 },
-            { name: 'Peppers Red', threshold: 5, stock: 0 },
-            { name: 'Peppers Scotch Bonnet', threshold: 8, stock: 0 },
-            { name: 'Tomato Medium 6x7', threshold: 10, stock: 0 },
-            { name: 'Garlic Puree', threshold: 6, stock: 0 },
-            { name: 'Vegetarian Bean Spice Mix', threshold: 4, stock: 0 },
-            { name: 'Black Pepper Ground Filler Pouch', threshold: 6, stock: 0 },
-            { name: 'Powder Mexican Chili', threshold: 5, stock: 0 },
-            { name: 'New and Improved Ground Beef', threshold: 7, stock: 0 },
-            { name: 'Cinnamon Sugar Shaker', threshold: 8, stock: 0 },
-            { name: 'Seasoning Mexican Steak Halal', threshold: 5, stock: 0 },
-            { name: 'Seasoning Chicken Rub', threshold: 5, stock: 0 },
-            { name: 'Paddle Wood 36"', threshold: 4, stock: 0 },
-            { name: 'Perf Portion Spoon 1 Oz', threshold: 3, stock: 0 },
-            { name: 'Sugar White Fine', threshold: 10, stock: 0 },
-            { name: 'Topping Chocolate Choc O Rich', threshold: 8, stock: 0 },
-            { name: 'Corn Whole Kernel', threshold: 5, stock: 0 },
-            { name: 'Tomato Diced No Salt Added', threshold: 6, stock: 0 },
-            { name: 'Bean Black Turtle', threshold: 6, stock: 0 },
-            { name: 'Bean Pinto', threshold: 7, stock: 0 },
-            { name: 'Garbage Bag Black Strong 35x50', threshold: 10, stock: 0 },
-            { name: 'Garbage Bag Black Strong 30x38', threshold: 8, stock: 0 },
-            { name: 'Garbage Bag Clear Enhance 35x50', threshold: 5, stock: 0 },
-            { name: 'Bag Poly 2lb 4x2x10', threshold: 12, stock: 0 },
-            { name: 'Bag Poly 3lb 5x2x11.5', threshold: 12, stock: 0 },
-            { name: 'Bag Apple Pie', threshold: 6, stock: 0 },
-            { name: 'Bag Paper Twist Handle', threshold: 15, stock: 0 },
-            { name: 'Bag Printed Small 4x2x8', threshold: 10, stock: 0 },
-            { name: 'Cleaner Detergent Pot and Pan', threshold: 5, stock: 0 },
-            { name: 'Pad Scour Green H-97 6x9', threshold: 4, stock: 0 },
-            { name: 'Grill Brick Acr', threshold: 3, stock: 0 },
-            { name: 'Delimer Cleaner Tablets', threshold: 6, stock: 0 },
-            { name: 'Sanitizer Quat II Liquid', threshold: 8, stock: 0 },
-            { name: 'Cleaner Restroom Kay QSR', threshold: 6, stock: 0 },
-            { name: 'Cleaner Grill Heat Activated', threshold: 5, stock: 0 },
-            { name: 'Detergent Sink Multi Purpose', threshold: 7, stock: 0 },
-            { name: 'CL HDD Degreaser Bag', threshold: 4, stock: 0 },
-            { name: 'Cleaner & Polish Stainless', threshold: 5, stock: 0 },
-            { name: 'Degreaser QSR Heavy Duty', threshold: 8, stock: 0 },
-            { name: 'IA Hand Foam Antibac Soap', threshold: 10, stock: 0 },
-            { name: '2 in 1 Conc Floor Cleaner', threshold: 5, stock: 0 },
-            { name: 'Kay QSR Tile Floor Cleaner', threshold: 6, stock: 0 },
-            { name: 'Portion Cup PS Translucent 2oz', threshold: 8, stock: 0 },
-            { name: 'Portion Cup Plastic Clear 3.25oz', threshold: 6, stock: 0 },
-            { name: 'Lid for 3.25-5.5oz Portion Cup', threshold: 10, stock: 0 },
-            { name: 'Container Bagasse 9x6', threshold: 12, stock: 0 },
-            { name: 'Wooden Spoon Bar Burrito', threshold: 8, stock: 0 },
-            { name: 'Wooden Knife Bar Burrito', threshold: 8, stock: 0 },
-            { name: 'Wooden Fork Bar Burrito', threshold: 8, stock: 0 },
-            { name: 'Spring Water Pure Life Pet', threshold: 15, stock: 0 },
-            { name: 'Water Purified', threshold: 10, stock: 0 },
-            { name: 'Cola Coke Pet 500ml', threshold: 12, stock: 0 },
-            { name: 'Cola Coke Zero 500ml', threshold: 10, stock: 0 },
-            { name: 'Cola Coke Diet Pet 500ml', threshold: 10, stock: 0 },
-            { name: 'Soda Sprite Pet 500ml', threshold: 10, stock: 0 },
-            { name: 'Ginger Ale Canada Dry Pet 500ml', threshold: 10, stock: 0 },
-            { name: 'Root Beer Barqs 500ml', threshold: 8, stock: 0 },
-            { name: 'Soda Fresca Pet 500ml', threshold: 12, stock: 0 },
-            { name: 'Energy Drink Monster Can', threshold: 5, stock: 0 },
-            { name: 'Energy Drink Monster Ultra', threshold: 6, stock: 0 },
-            { name: 'Drink BodyArmor Fruit Punch', threshold: 7, stock: 0 },
-            { name: 'Drink BodyArmor Strawberry Banana', threshold: 7, stock: 0 }
-        ];
+        const inventory = {
+            "Frozen": [
+                { name: 'YVES GROUND ROUND VEGGIE', threshold: 1, stock: 0, price: 72.27, unit: 'CASE' },
+                { name: 'HORMEL PORK CARNITA SHRED PULLED', threshold: 1, stock: 0, price: 73.75, unit: 'CASE' },
+                { name: 'SONORA TORTILLA FLOUR 5"', threshold: 1, stock: 0, price: 65.06, unit: 'CASE' },
+                { name: 'BARBUR BEEF BONELESS SEASONED FAJITA', threshold: 1, stock: 0, price: 73.75, unit: 'CASE' },
+                { name: 'BARBUR CHURROS WOREO CRUMB/SUGAR TOP', threshold: 1, stock: 0, price: 116.81, unit: 'CASE' },
+                { name: "JJ CHURRO TIO PEPE'S 10\"", threshold: 1, stock: 0, price: 58.35, unit: 'CASE' },
+                { name: 'GRECN FALAFEL FRITTER UNCOOKED', threshold: 1, stock: 0, price: 65.83, unit: 'CASE' },
+                { name: 'TFAYAN WRAP PLAIN 12" GLUTEN FREE', threshold: 1, stock: 0, price: 70.63, unit: 'CASE' },
+                { name: 'RUIZ EMPANADA APPLE PIE', threshold: 1, stock: 0, price: 45.37, unit: 'CASE' },
+                { name: 'OCEANJ POLLOCK TACO CUT BREADED', threshold: 1, stock: 0, price: 60.47, unit: 'CASE' },
+                { name: 'OJEWEL SHRIMP WHT BRD POPCORN', threshold: 2, stock: 0, price: 64.48, unit: 'CASE' },
+                { name: 'BARBUR BARBURRITO CHICKEN BITE HALAL', threshold: 2, stock: 0, price: 91.25, unit: 'CASE' },
+                { name: 'BARBUR UNMARINATED CHICKEN HALAL', threshold: 4, stock: 0, price: 118.11, unit: 'CASE' },
+                { name: 'SONORA TORTILLA CORN YELLOW PRE CUT', threshold: 2, stock: 0, price: 41.36, unit: 'CASE' },
+                { name: 'SONORA TORTILLA FLOUR 13.5"', threshold: 1, stock: 0, price: 64.47, unit: 'CASE' },
+                { name: 'SONORA TORTILLA WHOLE WHEAT 13.5"', threshold: 1, stock: 0, price: 65.43, unit: 'CASE' },
+                { name: 'SONORA TORTILLA WHOLE WHEAT 10"', threshold: 1, stock: 0, price: 43.83, unit: 'CASE' },
+                { name: 'SONORA TORTILLA SUNDRIED TOMATO 12"', threshold: 1, stock: 0, price: 58.97, unit: 'CASE' },
+                { name: 'SONORA TORTILLA FLOUR 10"', threshold: 1, stock: 0, price: 41.77, unit: 'CASE' },
+                { name: 'CAVEND FRIES S/C PUB EXTRA CRUNCH', threshold: 2, stock: 0, price: 45.29, unit: 'CASE' },
+                { name: 'BARBUR BAR BURRITO PL GUACAMOLE', threshold: 2, stock: 0, price: 61.41, unit: 'CASE' }
+            ],
+            "Refrigerated": [
+                { name: 'GAYLEA SOUR CREAM 14%', threshold: 1, stock: 0, price: 50.29, unit: 'CASE' },
+                { name: 'CHEFN CHEESE CHED & MOZZ SHRD 75/25', threshold: 3, stock: 0, price: 72.32, unit: 'CASE' },
+                { name: 'GAYLEA CREAM 10% CORRUGATED', threshold: 1, stock: 0, price: 3.90, unit: 'SPLIT' },
+                { name: 'GAYLEA SOUR CREAM 14%', threshold: 2, stock: 0, price: 23.19, unit: 'CASE' },
+                { name: 'SONORA 5" WHITE CORN TORTILLA RTE', threshold: 1, stock: 0, price: 23.10, unit: 'CASE' },
+                { name: 'LEADBE GROUND BEEF LEAN FRESH', threshold: 1, stock: 0, price: 44.62, unit: 'CASE' },
+                { name: 'BARBUR STEAK BEEF STRIPS STIR FRY', threshold: 1, stock: 0, price: 87.25, unit: 'CASE' },
+                { name: 'COOLC PEPPER JALAPENO SLICED', threshold: 1, stock: 0, price: 27.08, unit: 'CASE' },
+                { name: 'DERLEA GARLIC PUREE', threshold: 1, stock: 0, price: 40.00, unit: 'CASE' }
+            ],
+            "Dry Grocery": [
+            { name: 'MOTTS JUICE LIME REAL PLASTIC', threshold: 1, stock: 0, price: 25.20, unit: 'CASE' },
+    { name: 'SCEMKR SAUCE BBQ', threshold: 1, stock: 0, price: 33.62, unit: 'CASE' },
+    { name: 'SCEMKR SAUCE MEXICAN BAJA CHIPOTLE', threshold: 1, stock: 0, price: 30.56, unit: 'CASE' },
+    { name: 'SAPORI OIL CANOLA TFF JUG IN BOX', threshold: 1, stock: 0, price: 39.78, unit: 'CASE' },
+    { name: 'HEINZ KETCHUP PORTION', threshold: 1, stock: 0, price: 28.17, unit: 'CASE' },
+    { name: 'PC KETCHUP PORTION', threshold: 1, stock: 0, price: 18.27, unit: 'CASE' },
+    { name: 'ALLENS VINEGAR WHITE', threshold: 1, stock: 0, price: 15.18, unit: 'CASE' },
+    { name: 'DOLE PINEAPPLE TIDBIT PIZZA', threshold: 1, stock: 0, price: 68.57, unit: 'CASE' },
+    { name: 'OASIS JUICE APPLE TETRA', threshold: 1, stock: 0, price: 13.81, unit: 'CASE' },
+    { name: 'TROPDE JUICE STRAWBERRY BANANA GLASS', threshold: 1, stock: 0, price: 16.13, unit: 'CASE' },
+    { name: 'TROPDE NECTAR MANGO GLASS', threshold: 1, stock: 0, price: 16.13, unit: 'CASE' },
+    { name: 'NESTEA ICED TEA LEMON PLASTIC', threshold: 1, stock: 0, price: 17.78, unit: 'CASE' },
+    { name: 'NESTEA ICED TEA LEMON ZERO PLASTIC', threshold: 1, stock: 0, price: 17.78, unit: 'CASE' },
+    { name: 'MNMAID JUICE ORANGE PLASTIC', threshold: 1, stock: 0, price: 17.78, unit: 'CASE' },
+    { name: 'MNMAID JUICE 5 ALIVE PLASTIC', threshold: 1, stock: 0, price: 17.78, unit: 'CASE' },
+    { name: 'MNMAID JUICE APPLE 100% VITAMIN C', threshold: 1, stock: 0, price: 17.78, unit: 'CASE' },
+    { name: 'TROPDE DRINK MANGO NECTAR TETRA 1L', threshold: 1, stock: 0, price: 22.35, unit: 'CASE' },
+    { name: 'BARBUR RICE SEASONING MIX MEXICAN', threshold: 1, stock: 0, price: 122.80, unit: 'CASE' },
+    { name: 'NUPAK RICE PARBOILED', threshold: 2, stock: 0, price: 37.71, unit: 'CASE' },
+    { name: 'HELMAN MAYONNAISE REAL PAIL', threshold: 1, stock: 0, price: 50.41, unit: 'CASE' },
+    { name: 'FRANKS SAUCE HOT REDHOT BUFFALO WING', threshold: 1, stock: 0, price: 32.33, unit: 'CASE' },
+    { name: 'HELMAN SAUCE ANCHO CHIPOTLE', threshold: 1, stock: 0, price: 47.47, unit: 'CASE' },
+    { name: 'ROSEHL SAUCE NASHVILLE', threshold: 1, stock: 0, price: 66.96, unit: 'CASE' },
+    { name: 'KIKKOM SAUCE CHILI THAI STYLE', threshold: 3, stock: 0, price: 19.63, unit: 'SPLIT' },
+    { name: 'BARBUR SAUCE NACHO GOURMET 106OZ', threshold: 1, stock: 0, price: 59.31, unit: 'CASE' },
+    { name: 'LUCIPH SAUCE HOT NORTHERN REAPER', threshold: 1, stock: 0, price: 66.67, unit: 'CASE' },
+    { name: 'DELMAR JERK SAUCE', threshold: 1, stock: 0, price: 42.03, unit: 'CASE' },
+    { name: 'BARBUR BARBUR JERK SAUCE JUG', threshold: 1, stock: 0, price: 49.90, unit: 'CASE' },
+    { name: 'COKE WTR GLACEAU VITAMIN WTR XXX', threshold: 1, stock: 0, price: 23.06, unit: 'CASE' },
+    { name: 'COKE WATER GLACEAU ESSENTIAL VITAMN', threshold: 1, stock: 0, price: 23.06, unit: 'CASE' },
+    { name: 'COKE WTR GLACEAU VITAMIN WTR MULTI', threshold: 1, stock: 0, price: 23.06, unit: 'CASE' },
+    { name: 'COKE WATER SMARTWATER PET', threshold: 1, stock: 0, price: 38.63, unit: 'CASE' },
+    { name: 'PLIFE SPRING WATER PURE LIFE PET', threshold: 1, stock: 0, price: 6.27, unit: 'CASE' },
+    { name: 'DASANI WATER PURIFIED', threshold: 1, stock: 0, price: 14.61, unit: 'CASE' },
+    { name: 'COKE COLA COKE PET 500ML', threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: 'COKE COLA COKE ZERO 500ML', threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: 'COKE COLA COKE DIET PET 500ML', threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: 'COKE SODA SPRITE PET 500ML', threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: 'CANADA GNGR ALE CANADA DRY PET 500ML', threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: "COKE ROOT BEER BARQ'S 500ML", threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: 'AHA LIME WATERMELON BOTTLE', threshold: 1, stock: 0, price: 21.28, unit: 'CASE' },
+    { name: 'FANTA DRINK ORANGE', threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: 'AHA RASPBERRY ACAI-KO BOTTLE', threshold: 1, stock: 0, price: 21.28, unit: 'CASE' },
+    { name: 'MONSTE ENERGY DRINK MONSTER CAN', threshold: 1, stock: 0, price: 19.74, unit: 'CASE' },
+    { name: 'MONSTE ENERGY DRINK MONSTER ULTRA', threshold: 1, stock: 0, price: 19.74, unit: 'CASE' },
+    { name: 'COKE DRINK BODYARMOR FRUITPUNCH', threshold: 1, stock: 0, price: 31.34, unit: 'CASE' },
+    { name: 'COKE DRINK BODYARMOR STRBRY BANANA', threshold: 1, stock: 0, price: 31.34, unit: 'CASE' },
+    { name: 'MONSTE ENERGY DRNK MONSTER MANGO LOCO', threshold: 1, stock: 0, price: 19.74, unit: 'CASE' },
+    { name: 'COKE DRINK BODYARMOR PEACH MANGO', threshold: 1, stock: 0, price: 31.34, unit: 'CASE' },
+    { name: 'COKE COLA COKE CHERRY', threshold: 1, stock: 0, price: 29.69, unit: 'CASE' },
+    { name: 'BARBUR VEGETARIAN BEAN SPICE MIX', threshold: 1, stock: 0, price: 166.50, unit: 'CASE' },
+    { name: 'BARBUR POWDER MEXICAN CHILI', threshold: 1, stock: 0, price: 73.45, unit: 'CASE' },
+    { name: 'BARBUR NEW AND IMPROVED GROUND BEEF', threshold: 1, stock: 0, price: 190.88, unit: 'CASE' },
+    { name: 'HORTON CINNAMON SUGAR SHAKER', threshold: 1, stock: 0, price: 13.28, unit: 'SPLIT' },
+    { name: 'BARBUR SEASONING MEXICAN STEAK HALAL', threshold: 1, stock: 0, price: 125.50, unit: 'CASE' },
+    { name: 'BARBUR SEASONING CHICKEN RUB', threshold: 1, stock: 0, price: 160.50, unit: 'CASE' },
+    { name: 'RDPATH SUGAR WHITE FINE', threshold: 1, stock: 0, price: 3.63, unit: 'SPLIT' },
+    { name: 'RICHRD TOPPING CHOCOLATE CHOC O RICH', threshold: 1, stock: 0, price: 74.62, unit: 'CASE' },
+    { name: 'HARVES CORN WHOLE KERNEL', threshold: 1, stock: 0, price: 57.83, unit: 'CASE' },
+    { name: 'STONEY TOMATO DICED NO SALT ADDED', threshold: 2, stock: 0, price: 32.77, unit: 'CASE' },
+    { name: 'SHAH BEAN BLACK TURTLE', threshold: 1, stock: 0, price: 56.72, unit: 'CASE' },
+    { name: 'SHAH BEAN PINTO', threshold: 1, stock: 0, price: 58.58, unit: 'CASE' }
+            ],
+            "JARritos": [
+                { name: 'JARITO SODA MEXICAN LIME', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN MANGO', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN PINEAPPLE', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO COLA MEXICAN', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN GUAVA', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN MANDARIN', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN FRUIT PUNCH', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN GRAPEFRUIT', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN TAMARIND', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA MEXICAN SANGRIA', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' },
+                { name: 'JARITO SODA WATERMELON', threshold: 1, stock: 0, price: 34.02, unit: 'CASE' }
+            ],
+            "Cleaning, Paper & Disposables": [
+                { name: 'RALSTN GARBAGE BAG BLACK STRONG 35X50', threshold: 1, stock: 0, price: 24.36, unit: 'CASE' },
+                { name: 'RALSTN GARBAGE BAG BLACK STRONG 30X38', threshold: 1, stock: 0, price: 25.95, unit: 'CASE' },
+                { name: 'BARBUR BAG PRINTED SM 4X2X9', threshold: 1, stock: 0, price: 26.12, unit: 'CASE' },
+                { name: 'BARBUR BAG CAR ORDER PRINTED', threshold: 1, stock: 0, price: 66.58, unit: 'CASE' },
+                { name: 'BARBUR BAG APPLE PIE', threshold: 1, stock: 0, price: 32.31, unit: 'CASE' },
+                // Continue adding the remaining items with their respective price and unit...
+            ]
+        };
 
         function renderInventory() {
-            const inventoryList = document.getElementById('inventory-list');
-            inventoryList.innerHTML = '';
-            inventory.forEach((item, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.classList.add('item-card');
-                itemDiv.classList.toggle('flagged', item.stock < item.threshold);
-                
-                itemDiv.innerHTML = `
-                    <h3>${item.name}</h3>
-                    <p>Threshold: ${item.threshold}</p>
-                    <p>Current Stock: <span id="stock-${index}">${item.stock}</span></p>
-                    <button onclick="updateStock(${index}, 1)">+</button>
-                    <button onclick="updateStock(${index}, -1)">-</button>
-                    <input type="number" value="${item.stock}" step="0.1" onchange="setStock(${index}, this.value)">
-                `;
+            const inventoryContainer = document.getElementById('inventory-container');
+            inventoryContainer.innerHTML = '';
 
-                inventoryList.appendChild(itemDiv);
-            });
+            for (const section in inventory) {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.classList.add('inventory-section');
+
+                const sectionHeader = document.createElement('h2');
+                sectionHeader.textContent = section;
+                sectionDiv.appendChild(sectionHeader);
+
+                const inventoryList = document.createElement('div');
+                inventoryList.classList.add('inventory-list');
+                sectionDiv.appendChild(inventoryList);
+
+                inventory[section].forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('item-card');
+                    if (item.stock < item.threshold) {
+                        itemDiv.classList.add('flagged');
+                    }
+
+                    itemDiv.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <p>Price: $${item.price.toFixed(2)} per ${item.unit}</p>
+                        <p>Threshold: ${item.threshold}</p>
+                        <p>Current Stock: <span id="stock-${section}-${index}">${item.stock}</span></p>
+                        <button onclick="updateStock('${section}', ${index}, 1)">+</button>
+                        <button onclick="updateStock('${section}', ${index}, -1)">-</button>
+                        <input type="number" value="${item.stock}" step="0.1" onchange="setStock('${section}', ${index}, this.value)">
+                    `;
+
+                    inventoryList.appendChild(itemDiv);
+                });
+
+                inventoryContainer.appendChild(sectionDiv);
+            }
         }
 
-        function updateStock(index, change) {
-            inventory[index].stock = Math.max(0, inventory[index].stock + change);
+        function updateStock(section, index, change) {
+            inventory[section][index].stock = Math.max(0, inventory[section][index].stock + change);
             renderInventory();
         }
 
-        function setStock(index, value) {
-            inventory[index].stock = Math.max(0, parseFloat(value));
+        function setStock(section, index, value) {
+            inventory[section][index].stock = Math.max(0, parseFloat(value));
             renderInventory();
         }
 
         function exportFlaggedItems() {
-            const flaggedItems = inventory.filter(item => item.stock < item.threshold);
             let content = 'Flagged Items:\n\n';
-            flaggedItems.forEach(item => {
-                content += `${item.name}: Current Stock: ${item.stock}, Threshold: ${item.threshold}\n`;
-            });
+            for (const section in inventory) {
+                inventory[section].forEach(item => {
+                    if (item.stock < item.threshold) {
+                        content += `${item.name} (Section: ${section}): Current Stock: ${item.stock}, Threshold: ${item.threshold}, Price: $${item.price.toFixed(2)} per ${item.unit}\n`;
+                    }
+                });
+            }
 
             const blob = new Blob([content], { type: 'text/plain' });
             const link = document.createElement('a');
@@ -208,11 +251,15 @@
             const savedState = localStorage.getItem('inventoryState');
             if (savedState) {
                 const parsedState = JSON.parse(savedState);
-                parsedState.forEach((item, index) => {
-                    if (inventory[index]) {
-                        inventory[index].stock = item.stock;
+                for (const section in parsedState) {
+                    if (inventory[section]) {
+                        parsedState[section].forEach((item, index) => {
+                            if (inventory[section][index]) {
+                                inventory[section][index].stock = item.stock;
+                            }
+                        });
                     }
-                });
+                }
             }
         }
 
@@ -221,11 +268,15 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 const uploadedState = JSON.parse(e.target.result);
-                uploadedState.forEach((item, index) => {
-                    if (inventory[index]) {
-                        inventory[index].stock = item.stock;
+                for (const section in uploadedState) {
+                    if (inventory[section]) {
+                        uploadedState[section].forEach((item, index) => {
+                            if (inventory[section][index]) {
+                                inventory[section][index].stock = item.stock;
+                            }
+                        });
                     }
-                });
+                }
                 renderInventory();
             };
             reader.readAsText(file);
